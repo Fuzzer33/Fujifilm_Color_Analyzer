@@ -1,0 +1,53 @@
+# --- Privacy: never commit photos, location data, or the library ---
+# Photos and RAW files (screenshots in docs/ and synthetic fixtures are allowed below)
+*.raf
+*.RAF
+*.jpg
+*.jpeg
+*.JPG
+*.JPEG
+*.heic
+*.HEIC
+*.tif
+*.tiff
+*.dng
+*.xmp
+*.cos
+# Location data
+*.gpx
+*.GPX
+# Census output and real-library fixtures
+/census/
+/fixtures/private/
+# Allowed exceptions: JPEG screenshots in docs/, and the deliberately public synthetic fixtures
+!/docs/**/*.jpg
+!/docs/**/*.jpeg
+!/docs/**/*.JPG
+!/docs/**/*.JPEG
+!/fixtures/public/**
+
+# --- App data (derived and disposable) ---
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+/cache/
+.env
+.env.*
+
+# --- Build output ---
+/target/
+node_modules/
+dist/
+/src-tauri/gen/
+*.log
+
+# --- Editor / OS ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# --- Claude Code local settings ---
+.claude/settings.local.json

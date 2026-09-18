@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      # Tauri needs WebKitGTK on Linux. Applies once the scaffold exists (Phase 1, M1).
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux' && hashFiles('**/tauri.conf.json') != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      # Rust: the toolchain version comes from rust-toolchain.toml.
+      - name: Rust fmt, clippy, test
+        if: hashFiles('**/Cargo.toml') != ''
+        shell: bash
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --workspace --all-targets -- -D warnings
+          cargo test --workspace
+
+      # Node: the version comes from .nvmrc.
+      - uses: pnpm/action-setup@v4
+        if: hashFiles('**/package.json') != ''
+      - uses: actions/setup-node@v4
+        if: hashFiles('**/package.json') != ''
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Frontend install, typecheck, test
+        if: hashFiles('**/package.json') != ''
+        shell: bash
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run --if-present typecheck
+          pnpm run --if-present test
+
+      - name: Nothing to build yet
+        if: hashFiles('**/Cargo.toml') == '' && hashFiles('**/package.json') == ''
+        shell: bash
+        run: echo "No Rust or Node project yet. CI skeleton only."
